@@ -1,6 +1,6 @@
 package lgp;
 
-import com.github.chen0040.gp.lgp.LGP;
+
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import com.github.chen0040.gp.lgp.LGP;
 import com.github.chen0040.data.utils.TupleTwo;
 import com.github.chen0040.gp.commons.BasicObservation;
 import com.github.chen0040.gp.commons.Observation;
