@@ -21,7 +21,7 @@ The following methods are tested:
 
 # Dependencies
 
-For LR
+For LR (python)
 ```python
 gplearn==0.4.2
 numpy==1.25.2
@@ -29,7 +29,7 @@ pandas==1.1.5
 scipy==1.9.1
 ```
 
-For LGP
+For LGP (java)
 ```java
 import com.github.chen0040.gp.lgp.LGP;
 import com.github.chen0040.data.utils.TupleTwo;
@@ -41,7 +41,7 @@ import com.github.chen0040.gp.lgp.program.operators.*;
 import com.github.chen0040.gp.services.Tutorials;
 import com.github.chen0040.gp.utils.CollectionUtils;
 ```
-For TGP
+For TGP (python)
 ```python
 gplearn==0.4.2
 numpy==1.25.2
@@ -49,7 +49,7 @@ pandas==1.1.5
 scipy==1.9.1
 ```
 
-For CGP
+For CGP (python)
 ```python
 numpy==1.25.2
 pandas==1.1.5
