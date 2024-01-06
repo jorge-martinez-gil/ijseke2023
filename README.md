@@ -1,27 +1,44 @@
-# A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment
-Code of the paper *J. Martinez-Gil: A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment. Int. J. Softw. Eng. Knowl. Eng. 33(2): 289-312 (2023)*
 
-[https://doi.org/10.1142/S0218194022500772](https://doi.org/10.1142/S0218194022500772 "https://doi.org/10.1142/S0218194022500772")
+<!-- Add Attractive Title with Emojis -->
+<h1 align="center">
+ A Comparative Study of Ensemble Techniques Based on Genetic Programming 
+</h1>
 
-# Synopsis
-Semantic similarity assessment is an important task in NLP, which aims to measure the degree of similarity between two pieces of text. There are various techniques that have been developed to solve this problem, including our ensemble techniques based on genetic programming. We present a comparative study of different ensemble techniques based on genetic programming for semantic similarity assessment.
+*Code for reproducing:*
 
-# Methodology
-This repository explores the application of genetic programming to the problem of semantic similarity assessment. The paper compares various ensemble techniques that use genetic programming to combine multiple similarity measures in order to improve the accuracy of semantic similarity assessments. We perform experiments using several datasets and find that the ensemble techniques outperform individual similarity measures, demonstrating the potential of genetic programming in the field of NLP
+J. Martinez-Gil: A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment. Int. J. Softw. Eng. Knowl. Eng. 33(2): 289-312 (2023)
 
+<!-- Add DOI Badge -->
+<p align="center">
+  <a href="https://doi.org/10.1142/S0218194022500772">
+    <img src="https://img.shields.io/badge/DOI-10.1142%2FS0218194022500772-blue" alt="DOI">
+  </a>
+</p>
+
+<!-- Add Synopsis Section -->
+## :book: Synopsis
+Semantic similarity assessment is a crucial task in Natural Language Processing (NLP), aiming to quantify text similarity. In this research, we delve into cutting-edge ensemble techniques based on genetic programming, designed to enhance semantic similarity assessment. Join us on an exciting journey through the world of NLP and genetic programming.
+
+<!-- Add Methodology Section -->
+## :rocket: Methodology
+This repository is a treasure trove of knowledge on harnessing genetic programming for semantic similarity assessment. Our paper meticulously evaluates diverse ensemble techniques employing genetic programming to fuse multiple similarity measures. The results reveal their potential to elevate the accuracy of semantic similarity assessments, paving the way for innovations in NLP.
+
+<!-- Add Methods with Emojis -->
+### :microscope: Tested Methods
 The following methods are tested:
+- **(BASELINE) Linear Regression (LR)**
+  - :snake: (Python) A simple statistical method to model the relationship between variables. It predicts similarity based on linear relationships between text features.
+- **Linear Genetic Programming (LGP)**
+  - :coffee: (Java) An evolutionary technique using computer programs as solutions. It evolves linear programs to aggregate similarity measures for better predictions.
+- **Tree Genetic Programming (TGP)**
+  - :snake: (Python) Similar to LGP, but represents programs as trees. It evolves hierarchical programs for aggregating multiple similarity measures.
+- **Cartesian Genetic Programming (CGP)**
+  - :snake: (Python) It is a genetic programming variant with fixed grid-like structures for efficient program representation. It evolves connections and functions for semantic similarity assessment.
 
-- **(BASELINE) Linear Regression (LR)**. A simple statistical method to model the relationship between variables. It predicts similarity based on linear relationships between text features.
+<!-- Add Dependencies Section -->
+## :gear: Dependencies
 
-- **Linear Genetic Programming (LGP)**. An evolutionary technique using computer programs as solutions. It evolves linear programs to aggregate similarity measures for better predictions.
-
-- **Tree Genetic Programming (TGP)**. Similar to LGP, but represents programs as trees. It evolves hierarchical programs for aggregating multiple similarity measures.
-
-- **Cartesian Genetic Programming (CGP)**. It is a genetic programming variant with fixed grid-like structures for efficient program representation. It evolves connections and functions for semantic similarity assessment.
-
-# Dependencies
-
-For LR (python)
+### For LR (Python)
 ```python
 gplearn==0.4.2
 numpy==1.25.2
@@ -29,7 +46,7 @@ pandas==1.1.5
 scipy==1.9.1
 ```
 
-For LGP (java)
+### For LGP (java)
 ```java
 import com.github.chen0040.gp.lgp.LGP;
 import com.github.chen0040.data.utils.TupleTwo;
@@ -41,15 +58,14 @@ import com.github.chen0040.gp.lgp.program.operators.*;
 import com.github.chen0040.gp.services.Tutorials;
 import com.github.chen0040.gp.utils.CollectionUtils;
 ```
-For TGP (python)
+### For TGP (python)
 ```python
 gplearn==0.4.2
 numpy==1.25.2
 pandas==1.1.5
 scipy==1.9.1
 ```
-
-For CGP (python)
+### For CGP (python)
 ```python
 numpy==1.25.2
 pandas==1.1.5
@@ -70,7 +86,6 @@ The most important thing is that all methods use the same training and test data
 
 # Citation
 If you use this work, please cite:
-
 ```
 @article{martinezgil2023c,
   author       = {Jorge Martinez-Gil},
