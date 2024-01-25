@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+Tree Genetic Programming
+
+Jorge Martinez-Gil: A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment. Int. J. Softw. Eng. Knowl. Eng. 33(2): 289-312 (2023)
+
+@author: Jorge Martinez-Gil
+"""
+
 from gplearn.genetic import SymbolicRegressor
 import numpy as np
 import pandas as pd
