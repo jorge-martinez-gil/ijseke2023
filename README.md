@@ -7,7 +7,6 @@
   <a href="https://doi.org/10.1142/S0218194022500772"><img src="https://img.shields.io/badge/DOI-10.1142%2FS0218194022500772-blue" alt="DOI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue.svg" alt="Python 3.8+">
-  <a href="https://github.com/jorge-martinez-gil/ijseke2023/actions/workflows/ci.yml"><img src="https://github.com/jorge-martinez-gil/ijseke2023/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://doi.org/10.1142/S0218194022500772"><img src="https://img.shields.io/badge/Paper-IJSEKE%202023-orange" alt="Paper"></a>
 </p>
 
