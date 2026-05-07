@@ -31,6 +31,12 @@ def parse_args():
         default="pearson",
         help="Metric to optimize during evolution.",
     )
+    parser.add_argument(
+        "--verbose",
+        type=int,
+        default=100,
+        help="Verbosity level passed to tengp.simple_es.",
+    )
     return parser.parse_args()
 
 
@@ -87,7 +93,7 @@ def main():
             objective,
             params,
             mutation="probabilistic",
-            verbose=100,
+            verbose=args.verbose,
         )
         fitness = result[0].fitness
         if fitness > best_fitness:
@@ -109,7 +115,7 @@ def main():
         objective,
         params,
         mutation="probabilistic",
-        verbose=100,
+        verbose=args.verbose,
     )
 
     print(result[0].fitness)

@@ -31,6 +31,12 @@ def parse_args():
         default="pearson",
         help="Fitness metric used by SymbolicRegressor.",
     )
+    parser.add_argument(
+        "--verbose",
+        type=int,
+        default=2,
+        help="Verbosity level for GridSearchCV output.",
+    )
     return parser.parse_args()
 
 
@@ -61,7 +67,7 @@ def main():
         estimator=estimator,
         param_grid=param_grid,
         cv=5,
-        verbose=2,
+        verbose=args.verbose,
         n_jobs=-1,
     )
     grid_search.fit(X_train, y_train)

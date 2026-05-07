@@ -28,7 +28,7 @@ def parse_args():
         "--metric",
         choices=["pearson", "spearman"],
         default="pearson",
-        help="Target metric to highlight in output.",
+        help="Primary metric to highlight in output.",
     )
     return parser.parse_args()
 
@@ -52,11 +52,12 @@ def main():
 
     pearson = pearson_score(y_test, y_pred)
     spearman = spearman_score(y_test, y_pred)
-    selected = pearson if args.metric == "pearson" else spearman
+    primary = pearson if args.metric == "pearson" else spearman
+    secondary_name = "spearman" if args.metric == "pearson" else "pearson"
+    secondary = spearman if args.metric == "pearson" else pearson
 
-    print(f"Selected metric ({args.metric}): {selected:.6f}")
-    print(f"Pearson Correlation: {pearson:.6f}")
-    print(f"Spearman Correlation: {spearman:.6f}")
+    print(f"{args.metric.title()} Correlation (primary): {primary:.6f}")
+    print(f"{secondary_name.title()} Correlation: {secondary:.6f}")
 
 
 if __name__ == "__main__":
