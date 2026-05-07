@@ -1,111 +1,85 @@
 # -*- coding: utf-8 -*-
+"""Tree Genetic Programming for semantic similarity aggregation.
+
+Jorge Martinez-Gil: A Comparative Study of Ensemble Techniques Based on
+Genetic Programming: A Case Study in Semantic Similarity Assessment.
+Int. J. Softw. Eng. Knowl. Eng. 33(2): 289-312 (2023)
 """
-Tree Genetic Programming
 
-Jorge Martinez-Gil: A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment. Int. J. Softw. Eng. Knowl. Eng. 33(2): 289-312 (2023)
+import argparse
+from pathlib import Path
 
-@author: Jorge Martinez-Gil
-"""
-
-from gplearn.genetic import SymbolicRegressor
-import numpy as np
 import pandas as pd
-import scipy.stats
+from gplearn.genetic import SymbolicRegressor
+from sklearn.model_selection import GridSearchCV
 
-def my_pearson(x, y):
-    """
-    Calculates the Pearson correlation coefficient between two arrays.
+from utils import load_dataset, pearson_score, spearman_score
 
-    Parameters:
-    x (numpy.ndarray): The first array.
-    y (numpy.ndarray): The second array.
 
-    Returns:
-    float: The Pearson correlation coefficient between the two arrays.
-    """
-    a = x.flatten()
-    b = y.flatten()
-    return -1*np.corrcoef(a, b)[0, 1]
+def parse_args():
+    """Parse command-line options for dataset and optimization metric."""
+    parser = argparse.ArgumentParser(description="Run Tree GP with grid search.")
+    parser.add_argument(
+        "--dataset",
+        choices=["mc", "geresid"],
+        default="mc",
+        help="Dataset to use for training/validation splits.",
+    )
+    parser.add_argument(
+        "--metric",
+        choices=["pearson", "spearman"],
+        default="pearson",
+        help="Fitness metric used by SymbolicRegressor.",
+    )
+    return parser.parse_args()
 
-def my_spearman(x, y):
-    """
-    Calculates the Spearman correlation coefficient between two arrays.
 
-    Parameters:
-    x (numpy.ndarray): The first array.
-    y (numpy.ndarray): The second array.
+def main():
+    """Train TGP with grid search and report both correlation metrics."""
+    args = parse_args()
+    project_root = Path(__file__).resolve().parents[1]
 
-    Returns:
-    float: The Spearman correlation coefficient between the two arrays.
-    """
-    a = x.flatten()
-    b = y.flatten()
-    rho, p = scipy.stats.spearmanr(x, y)
-    return -1*rho
+    # Load train/validation splits from project-root datasets.
+    X_train, y_train = load_dataset(project_root, args.dataset, "training")
+    X_test, y_test = load_dataset(project_root, args.dataset, "validation")
 
-# Define the input files and categories
-input_file = "mc-training.txt"
-input_file2 = "mc-validation.txt"
-categories = ['b', 'c', 'd', 'e', 'f']
-categories2 = ['bert-cos', 'bert-inn', 'bert-man', 'bert-euc', 'bert-ang']
+    # Search a broad hyperparameter grid used in the original experiments.
+    param_grid = {
+        "population_size": [100, 500, 1000],
+        "generations": [5000, 9000, 12000],
+        "stopping_criteria": [0.01, 0.001],
+        "p_crossover": [0.75, 0.9],
+        "p_subtree_mutation": [0.1, 0.2],
+        "p_hoist_mutation": [0.05, 0.1],
+        "p_point_mutation": [0.1, 0.2],
+        "max_samples": [0.9, 0.95],
+        "parsimony_coefficient": [0.01, 0.001],
+    }
 
-# Read in the training data
-raw_dataset = pd.read_csv(input_file, error_bad_lines=False) 
-df = pd.read_csv(input_file, skipinitialspace=True, usecols=categories)
-y = pd.DataFrame(raw_dataset, columns=['a'])
+    estimator = SymbolicRegressor(metric=args.metric, random_state=0)
+    grid_search = GridSearchCV(
+        estimator=estimator,
+        param_grid=param_grid,
+        cv=5,
+        verbose=2,
+        n_jobs=-1,
+    )
+    grid_search.fit(X_train, y_train)
 
-# Convert the training data to numpy arrays
-X_train = df.to_numpy()
-y_train = y.to_numpy()
+    best_estimator = grid_search.best_estimator_
+    print("Best Hyperparameters:")
+    print(grid_search.best_params_)
 
-# Read in the test data
-raw_dataset = pd.read_csv(input_file2, error_bad_lines=False) 
-df = pd.read_csv(input_file2, skipinitialspace=True, usecols=categories2)
-y = pd.DataFrame(raw_dataset, columns=['truth']) 
+    # Refit best model on full training split, then evaluate on validation split.
+    best_estimator.fit(X_train, y_train)
+    y_pred = best_estimator.predict(X_test)
 
-# Convert the test data to numpy arrays
-X_test = df.to_numpy()
-y_test = y.to_numpy()
+    df_preds = pd.DataFrame({"Actual": y_test.squeeze(), "Predicted": y_pred.squeeze()})
+    print(df_preds)
 
-# Define the hyperparameter grid for grid search
-param_grid = {
-    'population_size': [100, 500, 1000],
-    'generations': [5000, 9000, 12000],
-    'stopping_criteria': [0.01, 0.001],
-    'p_crossover': [0.75, 0.9],
-    'p_subtree_mutation': [0.1, 0.2],
-    'p_hoist_mutation': [0.05, 0.1],
-    'p_point_mutation': [0.1, 0.2],
-    'max_samples': [0.9, 0.95],
-    'parsimony_coefficient': [0.01, 0.001]
-}
+    print(f"Pearson Correlation: {pearson_score(y_test, y_pred):.6f}")
+    print(f"Spearman Correlation: {spearman_score(y_test, y_pred):.6f}")
 
-# Create the SymbolicRegressor instance
-est_gp = SymbolicRegressor(metric='pearson', random_state=0)
 
-# Create the GridSearchCV instance
-grid_search = GridSearchCV(estimator=est_gp, param_grid=param_grid, cv=5, verbose=2, n_jobs=-1)
-
-# Fit the grid search on the training data
-grid_search.fit(X_train, y_train)
-
-# Get the best estimator after grid search
-best_estimator = grid_search.best_estimator_
-
-# Print the best hyperparameters
-print("Best Hyperparameters:")
-print(grid_search.best_params_)
-
-# Train the best estimator on the entire training data
-best_estimator.fit(X_train, y_train)
-
-# Predict on the test data using the best estimator
-y_pred = best_estimator.predict(X_test)
-
-# Create a dataframe of the actual and predicted values
-df_preds = pd.DataFrame({'Actual': y_test.squeeze(), 'Predicted': y_pred.squeeze()})
-print(df_preds)
-
-# Calculate the Pearson correlation coefficient between the actual and predicted values
-print("Pearson Correlation:", my_pearson(y_test, y_pred))
-#print("Spearman Correlation:", my_spearman(y_test, y_pred))
+if __name__ == "__main__":
+    main()
