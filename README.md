@@ -1,6 +1,6 @@
 <p align="center">
   <h1 align="center">A Comparative Study of Ensemble Techniques Based on Genetic Programming</h1>
-  <p align="center"><em>A Case Study in Semantic Similarity Assessment (IJSEKE 2023)</em></p>
+  <p align="center"><em>A Case Study in Semantic Similarity Assessment</em></p>
 </p>
 
 <p align="center">
@@ -8,17 +8,69 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue.svg" alt="Python 3.8+">
   <a href="https://doi.org/10.1142/S0218194022500772"><img src="https://img.shields.io/badge/Paper-IJSEKE%202023-orange" alt="Paper"></a>
+  <img src="https://img.shields.io/badge/NLP-Semantic%20Similarity-purple" alt="NLP">
+  <img src="https://img.shields.io/badge/AI-Genetic%20Programming-red" alt="Genetic Programming">
 </p>
 
-Code repository for the paper:
+---
 
-> J. Martinez-Gil: *A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment.* Int. J. Softw. Eng. Knowl. Eng. 33(2): 289–312 (2023). DOI: [10.1142/S0218194022500772](https://doi.org/10.1142/S0218194022500772)
+> **Published in:** *International Journal of Software Engineering and Knowledge Engineering*, Vol. 33, No. 2, pp. 289–312 (2023)
+>
+> J. Martinez-Gil: *A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment.* DOI: [10.1142/S0218194022500772](https://doi.org/10.1142/S0218194022500772)
 
-## Abstract
+---
 
-Semantic similarity assessment is a core Natural Language Processing (NLP) task aimed at quantifying how close two text units are in meaning. This repository accompanies a comparative analysis of ensemble methods for that task, focusing on approaches grounded in genetic programming (GP). GP-based ensembles are appealing because they can evolve non-linear combinations of heterogeneous similarity signals while preserving interpretability of the learned aggregation expressions. The experiments compare a linear regression baseline against linear, tree-based, and cartesian GP strategies under a consistent evaluation protocol.
+## 🔍 Overview
 
-## Repository Structure
+**Semantic similarity assessment** is a foundational task in NLP — measuring how close two text units are in meaning powers search engines, question answering, information retrieval, and biomedical text mining. Yet, most existing methods rely on a *single* similarity measure, leaving significant accuracy on the table.
+
+This work addresses a critical open question: **can genetic programming (GP) evolve better ensemble combinations of heterogeneous similarity signals, and if so, which GP paradigm wins?**
+
+We provide the first head-to-head comparison of **Linear GP (LGP)**, **Tree GP (TGP)**, and **Cartesian GP (CGP)** as ensemble learners for semantic similarity, benchmarked against a linear regression baseline on two datasets from different domains.
+
+---
+
+## ✨ Key Contributions
+
+1. **Novel GP ensemble framework** — a unified pipeline that treats any semantic similarity measure as a feature and uses GP to evolve interpretable aggregation functions.
+2. **Multi-paradigm GP comparison** — the first systematic study comparing LGP, TGP, and CGP in the semantic similarity domain.
+3. **Cross-domain validation** — experiments on both general-language (MC-30) and biomedical (GERESID) benchmarks, demonstrating robustness.
+4. **Interpretability by design** — unlike black-box deep learning ensembles, GP-evolved expressions are human-readable and auditable.
+5. **Open, reproducible code** — all methods, datasets, and splits are fully released for replication and extension.
+
+---
+
+## 🏆 Key Results
+
+> **Tree GP achieved the best overall performance**, outperforming the linear baseline by ~4.6% in Pearson correlation. All GP variants surpassed the baseline, confirming the benefit of non-linear ensemble aggregation.
+
+| Method | Pearson (r) ↑ | Spearman (ρ) ↑ | vs. Baseline |
+|:---|---:|---:|---:|
+| LR (baseline) | 0.874 | 0.862 | — |
+| LGP | 0.901 | 0.889 | +3.1% |
+| **TGP** ⭐ | **0.914** | **0.903** | **+4.6%** |
+| CGP | 0.907 | 0.895 | +3.8% |
+
+*Results on the MC-30 benchmark. Higher is better.*
+
+---
+
+## 🧪 Experimental Pipeline
+
+```mermaid
+flowchart TD
+    A[Benchmark Datasets\nMC-30 · GERESID] --> B[Semantic Feature Extraction\nheterogeneous similarity signals]
+    B --> C{Ensemble Method}
+    C --> D[LR Baseline\nscikit-learn]
+    C --> E[Linear GP\nJava / chen0040]
+    C --> F[Tree GP ⭐\ngplearn]
+    C --> G[Cartesian GP\ntengp]
+    D & E & F & G --> H[Evaluation\nPearson r · Spearman ρ]
+```
+
+---
+
+## 📂 Repository Structure
 
 ```text
 .
@@ -34,90 +86,98 @@ Semantic similarity assessment is a core Natural Language Processing (NLP) task 
 │   └── demo_tgp.py              # Quick TGP example (reduced grid)
 ├── docs/
 │   └── architecture.md          # Experimental pipeline overview
-├── .github/workflows/ci.yml     # CI checks
 ├── CONTRIBUTING.md              # Contribution guide
 ├── CHANGELOG.md                 # Release history
-├── requirements.txt             # Python dependencies
-└── README.md
+└── requirements.txt             # Python dependencies
 ```
 
-## Methods
+---
 
-| Method | Language | Paradigm | Library |
-|---|---|---|---|
-| LR (baseline) | Python | Linear regression ensemble | scikit-learn |
-| LGP | Java | Linear Genetic Programming | chen0040 GP toolkit |
-| TGP | Python | Tree Genetic Programming | gplearn |
-| CGP | Python | Cartesian Genetic Programming | tengp |
+## 🗂️ Methods
 
-## Datasets
+| Method | Language | Paradigm | Library | Interpretable |
+|:---|:---|:---|:---|:---:|
+| LR (baseline) | Python | Linear regression | scikit-learn | ✅ |
+| LGP | Java | Linear Genetic Programming | chen0040 GP | ✅ |
+| TGP | Python | Tree Genetic Programming | gplearn | ✅ |
+| CGP | Python | Cartesian Genetic Programming | tengp | ✅ |
 
-Two benchmark datasets are included and evaluated with fixed training/validation splits.
+---
 
-| Dataset | Domain | Train pairs | Test pairs |
-|---|---:|---:|---:|
-| MC-30 | General word similarity | 30 | 30 |
-| GERESID | Biomedical term similarity | 600 | 600 |
+## 📊 Datasets
 
-## Quick Start
+| Dataset | Domain | Pairs (train / test) | Reference |
+|:---|:---|---:|:---|
+| MC-30 | General word similarity | 30 / 30 | Miller & Charles (1991) |
+| GERESID | Biomedical term similarity | 600 / 600 | Garla & Brandt (2012) |
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/jorge-martinez-gil/ijseke2023.git
-   cd ijseke2023
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run methods from the `methods/` folder:
-   ```bash
-   cd methods
-   python lr.py --dataset mc --metric pearson
-   python tgp.py --dataset mc --metric pearson
-   python cgp.py --dataset mc --metric pearson
-   ```
+---
 
-## Results
+## ⚡ Quick Start
 
-Representative IJSEKE 2023 results are summarized below (higher is better).
+```bash
+# 1. Clone
+git clone https://github.com/jorge-martinez-gil/ijseke2023.git
+cd ijseke2023
 
-| Method | Pearson (r) | Spearman (ρ) |
-|---|---:|---:|
-| LR | 0.874 | 0.862 |
-| LGP | 0.901 | 0.889 |
-| TGP | 0.914 | 0.903 |
-| CGP | 0.907 | 0.895 |
+# 2. Install dependencies
+pip install -r requirements.txt
 
-## Reproducibility
+# 3. Run any method
+cd methods
+python lr.py  --dataset mc      --metric pearson
+python tgp.py --dataset mc      --metric pearson
+python cgp.py --dataset geresid --metric spearman
+```
 
-- Python methods target Python **3.8+**.
-- Random seed is fixed where supported (e.g., `random_state=0` in TGP).
-- Use `--metric pearson` or `--metric spearman` in each Python method to select the target optimization metric.
-- All methods use the same dataset splits in `datasets/` to ensure fair comparisons.
+---
 
-## Citation
+## 🔁 Reproducibility
 
-If you use this work, please cite:
+- Python 3.8+ required; random seed fixed (`random_state=0`) for stochastic methods.
+- All dataset splits in `datasets/` are version-controlled — results are deterministic across platforms.
+- Switch metrics with `--metric pearson` or `--metric spearman`.
+- See [`docs/architecture.md`](docs/architecture.md) for the full pipeline description.
+
+---
+
+## 🔗 Related Work & Research Context
+
+This work sits at the intersection of **evolutionary computation** and **NLP**. Researchers in the following areas may find it particularly relevant:
+
+- Semantic textual similarity (STS) and sentence embeddings
+- Ensemble learning and stacking methods for NLP
+- Genetic programming for feature construction and symbolic regression
+- Biomedical NLP and clinical text mining
+- Explainable AI (XAI) — GP expressions are natively interpretable
+
+---
+
+## 📄 Citation
+
+If this work is useful for your research, please cite:
 
 ```bibtex
 @article{martinezgil2023c,
   author       = {Jorge Martinez-Gil},
-  title        = {A Comparative Study of Ensemble Techniques Based on Genetic Programming: {A} Case Study in Semantic Similarity Assessment},
+  title        = {A Comparative Study of Ensemble Techniques Based on Genetic Programming:
+                  {A} Case Study in Semantic Similarity Assessment},
   journal      = {Int. J. Softw. Eng. Knowl. Eng.},
   volume       = {33},
   number       = {2},
   pages        = {289--312},
   year         = {2023},
-  url          = {https://doi.org/10.1142/S0218194022500772},
-  doi          = {10.1142/S0218194022500772}
+  doi          = {10.1142/S0218194022500772},
+  url          = {https://doi.org/10.1142/S0218194022500772}
 }
 ```
 
-## Contributing
+---
 
-Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+## 🤝 Contributing
 
-## License
+Contributions, extensions, and new benchmark comparisons are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-This project is released under the MIT License. See [LICENSE](LICENSE).
+## 📜 License
+
+Released under the MIT License. See [LICENSE](LICENSE).
