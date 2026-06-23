@@ -10,72 +10,65 @@
 package lgp;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import com.github.chen0040.gp.lgp.LGP;
-import com.github.chen0040.data.utils.TupleTwo;
 import com.github.chen0040.gp.commons.BasicObservation;
 import com.github.chen0040.gp.commons.Observation;
-import com.github.chen0040.gp.lgp.gp.Population;
 import com.github.chen0040.gp.lgp.program.Program;
 import com.github.chen0040.gp.lgp.program.operators.*;
-import com.github.chen0040.gp.services.Tutorials;
-import com.github.chen0040.gp.utils.CollectionUtils;
 
 public class lgp {
-	
-	   private static List<Observation> generate(String file){
-		      List<Observation> result = new ArrayList<>();
 
-		        try {
-		            final FileInputStream stream = new FileInputStream(file);
-					final BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-		            String data = "";
-		            do {
-		                data = reader.readLine();
-		                data = reader.readLine();
-		                if (data == null || data.trim().length() == 0) {
-		                	continue;
-		                } else {
-		                	final String [] line = data.split(",");
-		                    if (line.length == 5) {
-		                        try {
-		                            final double a = Double.parseDouble(line[0]);
-		                            final double b = Double.parseDouble(line[1]);
-		                            final double c = Double.parseDouble(line[2]);
-		                            final double d = Double.parseDouble(line[3]);
-		                            final double e = Double.parseDouble(line[4]);
+    private static final int FEATURE_COUNT = 5;
+    private static final String DEFAULT_DATASET = "mc";
 
-		        		            Observation observation = new BasicObservation(4, 1);
+    private static List<Observation> generate(Path file) {
+        List<Observation> result = new ArrayList<>();
 
-		        		            observation.setInput(0, b);
-		        		            observation.setInput(1, c);
-		        		            observation.setInput(2, d);
-		        		            observation.setInput(3, e);
-		        		            observation.setOutput(0, a);
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
+            String data = reader.readLine();
+            while ((data = reader.readLine()) != null) {
+                if (data.trim().length() == 0) {
+                    continue;
+                }
 
-		        		            result.add(observation);
-		                            
-		                            
-		                            
-		                        } catch(final NumberFormatException e) {
-		                            System.out.println(e);
-		                        }
-		                    }
-		                } // End of the if //
-		            } while(data != null);            
+                final String[] line = data.split(",");
+                if (line.length == FEATURE_COUNT + 1) {
+                    try {
+                        final double label = Double.parseDouble(line[0].trim());
+                        Observation observation = new BasicObservation(FEATURE_COUNT, 1);
 
-		            
-		        } catch(Exception e) {
-		            e.printStackTrace();
-		        }
-		      return result;
-		   } 
+                        for (int i = 0; i < FEATURE_COUNT; i++) {
+                            observation.setInput(i, Double.parseDouble(line[i + 1].trim()));
+                        }
+                        observation.setOutput(0, label);
+
+                        result.add(observation);
+                    } catch(final NumberFormatException e) {
+                        System.out.println(e);
+                    }
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private static Path datasetPath(String datasetName, String split) {
+        String fileName = datasetName + "-" + split + ".txt";
+        Path fromProjectRoot = Paths.get("datasets", fileName);
+        if (Files.exists(fromProjectRoot)) {
+            return fromProjectRoot;
+        }
+        return Paths.get("..", "..", "datasets", fileName).normalize();
+    }
 	
 	   
 		public static double getPearson(double[] scores1, double[] scores2) {
@@ -158,9 +151,10 @@ public class lgp {
 		
 		double[] source;
 		double[] target;
+		String datasetName = args.length > 0 ? args[0] : DEFAULT_DATASET;
 		
-		List<Observation> trainingData = generate("mc-training.txt");
-		List<Observation> testingData = generate("mc-validation.txt");
+		List<Observation> trainingData = generate(datasetPath(datasetName, "training"));
+		List<Observation> testingData = generate(datasetPath(datasetName, "validation"));
 		
 		/*CollectionUtils.shuffle(data);
 		TupleTwo<List<Observation>, List<Observation>> split_data = CollectionUtils.split(data, 0.8);
@@ -172,10 +166,9 @@ public class lgp {
 	      lgp.getOperatorSet().addIfLessThanOperator();
 	      lgp.addConstants(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, -1.0, -2.0);
 		
-		lgp.setRegisterCount(7); // the number of register here is the number of input dimension of the training data times 3
+		lgp.setRegisterCount(FEATURE_COUNT * 3);
 		lgp.setCostEvaluator((program, observations)->{
 		 int j = 0;
-		 double error = 0;
 		 double[] s = new double [observations.size()];
 	     double[] t = new double [observations.size()];
 		 for(Observation observation : observations){

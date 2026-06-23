@@ -62,7 +62,7 @@ flowchart TD
     A[Benchmark Datasets\nMC-30 · GERESID] --> B[Semantic Feature Extraction\nheterogeneous similarity signals]
     B --> C{Ensemble Method}
     C --> D[LR Baseline\nscikit-learn]
-    C --> E[Linear GP\nJava / chen0040]
+    C --> E[Linear GP\nPython]
     C --> F[Tree GP ⭐\ngplearn]
     C --> G[Cartesian GP\ntengp]
     D & E & F & G --> H[Evaluation\nPearson r · Spearman ρ]
@@ -77,10 +77,11 @@ flowchart TD
 ├── datasets/                    # Benchmark splits for MC-30 and GERESID
 ├── methods/
 │   ├── lr.py                    # Linear Regression baseline
+│   ├── lgp.py                   # Pure Python Linear Genetic Programming
 │   ├── tgp.py                   # Tree Genetic Programming (gplearn)
 │   ├── cgp.py                   # Cartesian Genetic Programming (tengp)
 │   ├── utils.py                 # Shared dataset/metric utilities
-│   └── lgp/                     # Java Eclipse project for Linear GP
+│   └── lgp/                     # Legacy Java Eclipse project for Linear GP
 ├── examples/
 │   ├── demo_lr.py               # Quick LR example
 │   └── demo_tgp.py              # Quick TGP example (reduced grid)
@@ -98,7 +99,8 @@ flowchart TD
 | Method | Language | Paradigm | Library | Interpretable |
 |:---|:---|:---|:---|:---:|
 | LR (baseline) | Python | Linear regression | scikit-learn | ✅ |
-| LGP | Java | Linear Genetic Programming | chen0040 GP | ✅ |
+| LGP | Python | Linear Genetic Programming | pure Python | ✅ |
+| LGP legacy | Java | Linear Genetic Programming | chen0040 GP | ✅ |
 | TGP | Python | Tree Genetic Programming | gplearn | ✅ |
 | CGP | Python | Cartesian Genetic Programming | tengp | ✅ |
 
@@ -109,7 +111,7 @@ flowchart TD
 | Dataset | Domain | Pairs (train / test) | Reference |
 |:---|:---|---:|:---|
 | MC-30 | General word similarity | 30 / 30 | Miller & Charles (1991) |
-| GERESID | Biomedical term similarity | 600 / 600 | Garla & Brandt (2012) |
+| GERESID | Biomedical term similarity | 50 / 50 | Garla & Brandt (2012) |
 
 ---
 
@@ -126,6 +128,7 @@ pip install -r requirements.txt
 # 3. Run any method
 cd methods
 python lr.py  --dataset mc      --metric pearson
+python lgp.py --dataset mc      --metric spearman
 python tgp.py --dataset mc      --metric pearson
 python cgp.py --dataset geresid --metric spearman
 ```

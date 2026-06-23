@@ -29,6 +29,9 @@ jobs:
           python -m py_compile methods/*.py
           python -m py_compile examples/*.py
 
+      - name: Unit tests
+        run: python -m unittest discover -s tests
+
       - name: Smoke test demos (MC)
         run: |
           python examples/demo_lr.py

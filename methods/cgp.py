@@ -10,8 +10,6 @@ import argparse
 from pathlib import Path
 
 import numpy as np
-import tengp
-from sklearn.model_selection import ParameterGrid
 
 from utils import load_dataset, pearson_score, spearman_score
 
@@ -57,6 +55,9 @@ def objective_spearman(y_true, y_pred):
 
 def main():
     """Train CGP over a grid and report Pearson/Spearman correlations."""
+    import tengp
+    from sklearn.model_selection import ParameterGrid
+
     args = parse_args()
     project_root = Path(__file__).resolve().parents[1]
 
@@ -77,7 +78,7 @@ def main():
     objective = objective_pearson if args.metric == "pearson" else objective_spearman
 
     best_params = None
-    best_fitness = float("-inf")
+    best_fitness = float("inf")
 
     for params_dict in param_grid:
         params = tengp.Parameters(
@@ -96,12 +97,12 @@ def main():
             verbose=args.verbose,
         )
         fitness = result[0].fitness
-        if fitness > best_fitness:
+        if fitness < best_fitness:
             best_fitness = fitness
             best_params = params_dict
 
     print("Best hyperparameters:", best_params)
-    print("Best fitness:", best_fitness)
+    print("Best objective value:", best_fitness)
 
     params = tengp.Parameters(
         n_inputs=X_train.shape[1],

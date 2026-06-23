@@ -7,12 +7,11 @@ on Genetic Programming. IJSEKE 33(2): 289-312.
 from pathlib import Path
 
 import numpy as np
-import scipy.stats
 
 
 FEATURE_COLS = {
     "training": ["b", "c", "d", "e", "f"],
-    "validation": ["bert-cos", "bert-inn", "bert-man", "bert-euc", "bert-ang"],
+    "validation": ["bert-cos", "bert-man", "bert-euc", "bert-inn", "bert-ang"],
 }
 
 LABEL_COL = {
@@ -23,11 +22,40 @@ LABEL_COL = {
 
 def pearson_score(y_true, y_pred):
     """Return Pearson r between y_true and y_pred (1-D arrays)."""
-    return float(np.corrcoef(y_true.flatten(), y_pred.flatten())[0, 1])
+    y_true = np.asarray(y_true, dtype=float).flatten()
+    y_pred = np.asarray(y_pred, dtype=float).flatten()
+    y_true_centered = y_true - y_true.mean()
+    y_pred_centered = y_pred - y_pred.mean()
+    denominator = np.linalg.norm(y_true_centered) * np.linalg.norm(y_pred_centered)
+    if denominator == 0:
+        return 0.0
+    return float(np.dot(y_true_centered, y_pred_centered) / denominator)
+
+
+def _rankdata(values):
+    """Return average ranks for a 1-D array, matching Spearman tie handling."""
+    values = np.asarray(values).flatten()
+    sorter = np.argsort(values, kind="mergesort")
+    sorted_values = values[sorter]
+    unique_starts = np.r_[True, sorted_values[1:] != sorted_values[:-1]]
+    dense_ranks = unique_starts.cumsum() - 1
+    counts = np.bincount(dense_ranks)
+    cumulative_counts = np.cumsum(counts)
+    starts = cumulative_counts - counts
+    average_ranks = (starts + cumulative_counts - 1) / 2.0 + 1.0
+
+    ranks = np.empty(values.shape, dtype=float)
+    ranks[sorter] = average_ranks[dense_ranks]
+    return ranks
 
 
 def spearman_score(y_true, y_pred):
     """Return Spearman rho between y_true and y_pred (1-D arrays)."""
+    try:
+        import scipy.stats
+    except ImportError:
+        return pearson_score(_rankdata(y_true), _rankdata(y_pred))
+
     rho, _ = scipy.stats.spearmanr(y_true.flatten(), y_pred.flatten())
     return float(rho)
 
@@ -62,6 +90,11 @@ def load_dataset(base_dir, dataset_name, split):
         raise ValueError("split must be 'training' or 'validation'.")
 
     raw = pd.read_csv(path, skipinitialspace=True, on_bad_lines="skip")
+    expected_cols = [LABEL_COL[split], *FEATURE_COLS[split]]
+    missing_cols = [column for column in expected_cols if column not in raw.columns]
+    if missing_cols:
+        raise ValueError(f"{path} is missing expected columns: {', '.join(missing_cols)}")
+
     X = raw[FEATURE_COLS[split]].to_numpy()
     y = raw[LABEL_COL[split]].to_numpy()
     return X, y
