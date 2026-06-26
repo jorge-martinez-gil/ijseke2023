@@ -1,6 +1,11 @@
+# Core paper environment (pins reproduce the original GP results).
 gplearn==0.4.2
 numpy==1.25.2
 pandas==1.5.3
 scikit_learn==1.3.0
 scipy==1.9.1
+# Optional: Cartesian GP. tengp may need to be installed from its source
+# repository depending on your platform; the harness skips CGP if it is absent.
 tengp==0.4
+# Benchmark harness figures.
+matplotlib>=3.5,<4

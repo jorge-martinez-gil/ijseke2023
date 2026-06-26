@@ -1,40 +1,46 @@
 # Architecture
 
-## Experimental Pipeline
+## Two layers
 
-The project follows a common pipeline for all methods:
+1. **Standalone method scripts** in `methods/` (`lr.py`, `lgp.py`, `tgp.py`,
+   `cgp.py`, sharing `utils.py`). Each has a small CLI and reproduces a single
+   method on a single dataset — convenient for teaching and quick experiments.
+2. **The benchmark harness** in `bench/`, which evaluates *all* methods on *all*
+   datasets and produces reports and figures with a single command
+   (`python -m bench`). See [`benchmarking.md`](benchmarking.md).
 
-1. Load benchmark pairs from `datasets/`.
-2. Use precomputed semantic features as model inputs.
-3. Train an ensemble model (LR, LGP, TGP, or CGP).
-4. Evaluate predictions against gold similarity scores.
+Both layers read the datasets through the same loader, so results are consistent.
 
-## Method Relationship Diagram
+## Experimental pipeline
 
 ```text
-                +------------------+
-                |  Shared Datasets |
-                |  (MC-30, GERESID)|
-                +---------+--------+
-                          |
-          +---------------+---------------+
-          |                               |
-  +-------v-------+               +-------v-------+
-  |  LR Baseline  |               | GP Ensembles  |
-  |  (Python)     |               | (LGP/TGP/CGP) |
-  +-------+-------+               +-------+-------+
-          |                               |
-          +---------------+---------------+
-                          |
-                  +-------v-------+
-                  |  Evaluation    |
-                  | Pearson/Rho    |
-                  +---------------+
+        +------------------------+
+        |   datasets/ (MC, …)    |
+        +-----------+------------+
+                    | load_split
+          +---------v----------+
+          |  feature matrix X  |   (each column = one similarity measure)
+          |  gold vector y     |
+          +---------+----------+
+                    |
+   +----------------+-----------------+
+   |        method adapters           |   LR · LGP · TGP · CGP
+   |  fit_predict(X_train,y,X_test)   |
+   +----------------+-----------------+
+                    | predictions
+          +---------v----------+
+          |   metrics + CIs    |   Pearson / Spearman, bootstrap, paired tests
+          +---------+----------+
+                    |
+        +-----------v------------+
+        | reports + figures      |   Markdown / CSV / LaTeX / PNG / PDF
+        +------------------------+
 ```
 
-## Evaluation Protocol
+## Evaluation protocol
 
-- Each method uses the same training/validation split per dataset.
-- Training files provide input similarity features and a target score.
-- Validation files provide BERT-based features with reference truth values.
-- Final quality is reported with Pearson and Spearman correlations.
+The shipped MC-30 and GeReSiD splits cover the **same pairs** for fitting and
+scoring (validation gold scores match the training targets; only the feature
+representation differs). Reported correlations therefore measure goodness-of-fit
+on the benchmark pairs, consistent with the original study — not generalisation
+to unseen pairs. Held-out k-fold evaluation is planned (see the README roadmap).

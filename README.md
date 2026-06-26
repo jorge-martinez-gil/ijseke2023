@@ -1,186 +1,194 @@
 <p align="center">
-  <h1 align="center">A Comparative Study of Ensemble Techniques Based on Genetic Programming</h1>
-  <p align="center"><em>A Case Study in Semantic Similarity Assessment</em></p>
+  <h1 align="center">Semantic Similarity Ensembles with Genetic Programming</h1>
+  <p align="center"><em>A reproducible benchmark for evolving and comparing ensemble combinations of semantic similarity measures</em></p>
 </p>
 
 <p align="center">
   <a href="https://doi.org/10.1142/S0218194022500772"><img src="https://img.shields.io/badge/DOI-10.1142%2FS0218194022500772-blue" alt="DOI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue.svg" alt="Python 3.8+">
-  <a href="https://doi.org/10.1142/S0218194022500772"><img src="https://img.shields.io/badge/Paper-IJSEKE%202023-orange" alt="Paper"></a>
+  <img src="https://img.shields.io/badge/reproducible-%E2%9C%93-success" alt="Reproducible">
   <img src="https://img.shields.io/badge/NLP-Semantic%20Similarity-purple" alt="NLP">
-  <img src="https://img.shields.io/badge/AI-Genetic%20Programming-red" alt="Genetic Programming">
+  <img src="https://img.shields.io/badge/EC-Genetic%20Programming-red" alt="Genetic Programming">
 </p>
 
----
+> **Keywords:** semantic similarity ensemble · semantic textual similarity · grammatical evolution · genetic programming · sentence similarity benchmark · automatic ensemble learning · text similarity evaluation · similarity measure comparison
 
-> **Published in:** *International Journal of Software Engineering and Knowledge Engineering*, Vol. 33, No. 2, pp. 289–312 (2023)
->
-> J. Martinez-Gil: *A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment.* DOI: [10.1142/S0218194022500772](https://doi.org/10.1142/S0218194022500772)
+This repository accompanies the paper **J. Martinez-Gil (2023), _A Comparative Study of Ensemble Techniques Based on Genetic Programming: A Case Study in Semantic Similarity Assessment_, International Journal of Software Engineering and Knowledge Engineering 33(2): 289–312** ([DOI: 10.1142/S0218194022500772](https://doi.org/10.1142/S0218194022500772)). It has grown from paper-companion code into a small **reproducible benchmarking platform** for semantic similarity ensembles.
 
 ---
 
-## 🔍 Overview
+## What problem does this solve?
 
-**Semantic similarity assessment** is a foundational task in NLP — measuring how close two text units are in meaning powers search engines, question answering, information retrieval, and biomedical text mining. Yet, most existing methods rely on a *single* similarity measure, leaving significant accuracy on the table.
+**Semantic similarity assessment** measures how close two text units are in meaning. It underpins search, question answering, information retrieval, deduplication, and biomedical text mining. Many systems rely on a *single* similarity measure, when in practice different measures capture different, complementary signals.
 
-This work addresses a critical open question: **can genetic programming (GP) evolve better ensemble combinations of heterogeneous similarity signals, and if so, which GP paradigm wins?**
+This project asks: **can we automatically combine heterogeneous similarity measures into a better ensemble, and which automatic technique should we use?** It treats each similarity measure as a feature and uses **Genetic Programming (GP)** — Linear GP, Tree GP, and Cartesian GP — to evolve an interpretable aggregation function, comparing them against a linear-regression baseline.
 
-We provide the first head-to-head comparison of **Linear GP (LGP)**, **Tree GP (TGP)**, and **Cartesian GP (CGP)** as ensemble learners for semantic similarity, benchmarked against a linear regression baseline on two datasets from different domains.
+### Why semantic similarity ensembles?
+No single measure dominates across domains. An ensemble that aggregates several measures can be more robust, and — unlike a hand-tuned formula — an *evolved* ensemble adapts to the data.
 
----
-
-## ✨ Key Contributions
-
-1. **Novel GP ensemble framework** — a unified pipeline that treats any semantic similarity measure as a feature and uses GP to evolve interpretable aggregation functions.
-2. **Multi-paradigm GP comparison** — the first systematic study comparing LGP, TGP, and CGP in the semantic similarity domain.
-3. **Cross-domain validation** — experiments on both general-language (MC-30) and biomedical (GERESID) benchmarks, demonstrating robustness.
-4. **Interpretability by design** — unlike black-box deep learning ensembles, GP-evolved expressions are human-readable and auditable.
-5. **Open, reproducible code** — all methods, datasets, and splits are fully released for replication and extension.
+### Why genetic / grammatical evolution?
+GP searches the space of symbolic aggregation functions and returns a **human-readable expression** (e.g. `(sin(x2) + x2/3)`), not a black box. That makes the resulting ensemble auditable and easy to port into other systems — a property deep ensembles lack.
 
 ---
 
-## 🏆 Key Results
+## Reproduce the results with one command
 
-> **Tree GP achieved the best overall performance**, outperforming the linear baseline by ~4.6% in Pearson correlation. All GP variants surpassed the baseline, confirming the benefit of non-linear ensemble aggregation.
+```bash
+pip install -r requirements.txt
+python -m bench                 # all available methods, all datasets
+```
 
-| Method | Pearson (r) ↑ | Spearman (ρ) ↑ | vs. Baseline |
-|:---|---:|---:|---:|
-| LR (baseline) | 0.874 | 0.862 | — |
-| LGP | 0.901 | 0.889 | +3.1% |
-| **TGP** ⭐ | **0.914** | **0.903** | **+4.6%** |
-| CGP | 0.907 | 0.895 | +3.8% |
+This runs every method on every benchmark dataset and writes, to `results/`:
 
-*Results on the MC-30 benchmark. Higher is better.*
+- **`RESULTS.md`** — a human-readable table with **95% bootstrap confidence intervals**, paired significance tests vs. the baseline, and the evolved expressions;
+- **`results.csv`** — tidy machine-readable results;
+- **`results.tex`** — a `booktabs` LaTeX table ready to drop into a paper;
+- **`figures/`** — publication-quality figures (PNG + PDF).
 
----
+Every number is computed at run time from the data in `datasets/` — **nothing is hard-coded** — and the run is deterministic for a fixed `--seed` (default `0`).
 
-## 🧪 Experimental Pipeline
+<p align="center">
+  <img src="results/figures/fig_correlation_bars.png" alt="Ensemble performance with 95% bootstrap confidence intervals" width="92%">
+</p>
 
-```mermaid
-flowchart TD
-    A[Benchmark Datasets\nMC-30 · GERESID] --> B[Semantic Feature Extraction\nheterogeneous similarity signals]
-    B --> C{Ensemble Method}
-    C --> D[LR Baseline\nscikit-learn]
-    C --> E[Linear GP\nPython]
-    C --> F[Tree GP ⭐\ngplearn]
-    C --> G[Cartesian GP\ntengp]
-    D & E & F & G --> H[Evaluation\nPearson r · Spearman ρ]
+> **What the numbers say.** On the small MC-30 and GeReSiD benchmarks shipped here, the linear baseline and the GP ensembles land within ~0.01 of each other in Pearson/Spearman correlation, and the differences are **not statistically significant** (the bootstrap confidence intervals overlap heavily). See [`results/RESULTS.md`](results/RESULTS.md) for the exact figures produced by your own run, and the [paper](https://doi.org/10.1142/S0218194022500772) for the originally reported study. Treat single-dataset gaps with care on benchmarks this small.
+
+### Useful options
+
+```bash
+python -m bench --quick              # fast, CI-friendly configuration
+python -m bench --datasets mc        # a single dataset
+python -m bench --methods lr lgp     # a subset of methods
+python -m bench --metric spearman    # optimise/report Spearman
+python -m bench --no-figures         # skip plots (no matplotlib needed)
+python -m bench --seed 1             # change the random seed
 ```
 
 ---
 
-## 📂 Repository Structure
+## Methods
+
+| Method | Paradigm | Library | Interpretable | Status |
+|:---|:---|:---|:---:|:---|
+| **LR** (baseline) | Linear regression | scikit-learn / NumPy | ✅ | always available |
+| **LGP** | Linear Genetic Programming | pure Python (shipped) | ✅ | always available |
+| **TGP** | Tree Genetic Programming | `gplearn` | ✅ | needs `gplearn` |
+| **CGP** | Cartesian Genetic Programming | `tengp` | ✅ | needs `tengp` |
+
+If an optional dependency is missing, the harness reports that method as **skipped** rather than guessing a number — so results are always honest.
+
+---
+
+## Datasets
+
+| Dataset | Domain | Pairs | Reference |
+|:---|:---|---:|:---|
+| **MC-30** | General word similarity | 30 | Miller & Charles (1991) |
+| **GeReSiD** | Biomedical term similarity | 50 | Garla & Brandt (2012) |
+
+**Evaluation protocol (read this).** In the shipped splits, the training and validation files cover the **same pairs** (the validation gold scores match the training targets; only the feature representation differs). Reported correlations therefore measure **goodness-of-fit on the benchmark pairs**, consistent with the original study — *not* generalisation to unseen pairs. Held-out k-fold evaluation is on the [roadmap](#roadmap).
+
+Adding a dataset is intentionally trivial: drop `datasets/<name>-training.txt` and `datasets/<name>-validation.txt` (same column layout) and register one entry in `bench/datasets.py`.
+
+---
+
+## How do I evaluate a new similarity measure or method?
+
+The harness is built around a tiny adapter interface, so extending it is a few lines.
+
+**A new similarity measure** is just a new feature column in the dataset files — no code needed.
+
+**A new ensemble method** is one `MethodAdapter` in `bench/methods.py`:
+
+```python
+def _fit_predict_mymethod(X_train, y_train, X_test, metric, seed, quick):
+    model = MyEnsemble(random_state=seed).fit(X_train, y_train)
+    return model.predict(X_test), {"expression": model.describe()}
+
+METHODS["mymethod"] = MethodAdapter(
+    key="mymethod", label="My Method", paradigm="…", library="…",
+    is_available=_always_available, fit_predict=_fit_predict_mymethod,
+)
+```
+
+It is then picked up automatically by `python -m bench`, including bootstrap CIs, the paired significance test, the report tables, and the figures.
+
+---
+
+## Repository structure
 
 ```text
 .
-├── datasets/                    # Benchmark splits for MC-30 and GERESID
-├── methods/
-│   ├── lr.py                    # Linear Regression baseline
-│   ├── lgp.py                   # Pure Python Linear Genetic Programming
-│   ├── tgp.py                   # Tree Genetic Programming (gplearn)
-│   ├── cgp.py                   # Cartesian Genetic Programming (tengp)
-│   ├── utils.py                 # Shared dataset/metric utilities
-│   └── lgp/                     # Legacy Java Eclipse project for Linear GP
-├── examples/
-│   ├── demo_lr.py               # Quick LR example
-│   └── demo_tgp.py              # Quick TGP example (reduced grid)
-├── docs/
-│   └── architecture.md          # Experimental pipeline overview
-├── CONTRIBUTING.md              # Contribution guide
-├── CHANGELOG.md                 # Release history
-└── requirements.txt             # Python dependencies
+├── bench/                       # ⭐ reproducible benchmark harness (this is the platform)
+│   ├── datasets.py              #   dataset registry + loader
+│   ├── methods.py               #   method adapters (LR, LGP, TGP, CGP)
+│   ├── metrics.py               #   Pearson/Spearman + vectorised bootstrap CIs + paired tests
+│   ├── runner.py                #   orchestration -> structured results
+│   ├── report.py                #   Markdown / CSV / LaTeX writers
+│   ├── figures.py               #   publication-quality matplotlib figures
+│   └── __main__.py              #   `python -m bench` CLI
+├── methods/                     # standalone single-method scripts (LR, LGP, TGP, CGP) + utils
+├── datasets/                    # MC-30 and GeReSiD splits
+├── results/                     # auto-generated tables + figures (regenerate with `python -m bench`)
+├── tests/                       # unit tests (metrics, data contracts, LGP, harness)
+├── docs/                        # architecture + benchmarking guide
+├── Dockerfile                   # pinned, reproducible environment
+└── requirements.txt
 ```
 
 ---
 
-## 🗂️ Methods
+## Reproducibility
 
-| Method | Language | Paradigm | Library | Interpretable |
-|:---|:---|:---|:---|:---:|
-| LR (baseline) | Python | Linear regression | scikit-learn | ✅ |
-| LGP | Python | Linear Genetic Programming | pure Python | ✅ |
-| LGP legacy | Java | Linear Genetic Programming | chen0040 GP | ✅ |
-| TGP | Python | Tree Genetic Programming | gplearn | ✅ |
-| CGP | Python | Cartesian Genetic Programming | tengp | ✅ |
+- **Deterministic:** fixed seeds for every stochastic method; re-running `python -m bench` reproduces the tables byte-for-byte.
+- **Self-describing:** each generated artifact carries a provenance header (UTC timestamp, git commit, seed, library versions).
+- **Containerised:** `docker build -t simbench . && docker run --rm -v "$PWD/results:/app/results" simbench` runs the whole benchmark in a pinned environment.
+- **Honest by construction:** the harness only reports numbers it computes; missing optional methods are skipped, never fabricated.
 
 ---
 
-## 📊 Datasets
+## Roadmap
 
-| Dataset | Domain | Pairs (train / test) | Reference |
-|:---|:---|---:|:---|
-| MC-30 | General word similarity | 30 / 30 | Miller & Charles (1991) |
-| GERESID | Biomedical term similarity | 50 / 50 | Garla & Brandt (2012) |
+Contributions are welcome on any of these — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
-
-## ⚡ Quick Start
-
-```bash
-# 1. Clone
-git clone https://github.com/jorge-martinez-gil/ijseke2023.git
-cd ijseke2023
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Run any method
-cd methods
-python lr.py  --dataset mc      --metric pearson
-python lgp.py --dataset mc      --metric spearman
-python tgp.py --dataset mc      --metric pearson
-python cgp.py --dataset geresid --metric spearman
-```
+- [ ] Held-out **k-fold cross-validation** mode (`--cv`) for generalisation estimates.
+- [ ] Additional standard STS benchmarks (e.g. SICK, STS-B) with automatic downloaders.
+- [ ] Sentence-embedding and transformer/LLM-embedding baselines as extra feature sets.
+- [ ] A grammar-driven (grammatical evolution) ensemble adapter.
+- [ ] A published leaderboard generated from `results/`.
 
 ---
 
-## 🔁 Reproducibility
+## Related work & research context
 
-- Python 3.8+ required; random seed fixed (`random_state=0`) for stochastic methods.
-- All dataset splits in `datasets/` are version-controlled — results are deterministic across platforms.
-- Switch metrics with `--metric pearson` or `--metric spearman`.
-- See [`docs/architecture.md`](docs/architecture.md) for the full pipeline description.
+This sits at the intersection of **evolutionary computation** and **NLP**. It may be relevant to work on: semantic textual similarity (STS) and sentence embeddings; ensemble learning and stacking for NLP; genetic programming and symbolic regression for feature construction; biomedical / clinical NLP; and explainable AI (the evolved ensembles are natively interpretable).
 
 ---
 
-## 🔗 Related Work & Research Context
+## Citation
 
-This work sits at the intersection of **evolutionary computation** and **NLP**. Researchers in the following areas may find it particularly relevant:
-
-- Semantic textual similarity (STS) and sentence embeddings
-- Ensemble learning and stacking methods for NLP
-- Genetic programming for feature construction and symbolic regression
-- Biomedical NLP and clinical text mining
-- Explainable AI (XAI) — GP expressions are natively interpretable
-
----
-
-## 📄 Citation
-
-If this work is useful for your research, please cite:
+If this repository or benchmark is useful in your research, please cite:
 
 ```bibtex
 @article{martinezgil2023c,
-  author       = {Jorge Martinez-Gil},
-  title        = {A Comparative Study of Ensemble Techniques Based on Genetic Programming:
-                  {A} Case Study in Semantic Similarity Assessment},
-  journal      = {Int. J. Softw. Eng. Knowl. Eng.},
-  volume       = {33},
-  number       = {2},
-  pages        = {289--312},
-  year         = {2023},
-  doi          = {10.1142/S0218194022500772},
-  url          = {https://doi.org/10.1142/S0218194022500772}
+  author  = {Jorge Martinez-Gil},
+  title   = {A Comparative Study of Ensemble Techniques Based on Genetic Programming:
+             {A} Case Study in Semantic Similarity Assessment},
+  journal = {Int. J. Softw. Eng. Knowl. Eng.},
+  volume  = {33},
+  number  = {2},
+  pages   = {289--312},
+  year    = {2023},
+  doi     = {10.1142/S0218194022500772},
+  url     = {https://doi.org/10.1142/S0218194022500772}
 }
 ```
 
----
+## Contributing
 
-## 🤝 Contributing
+Contributions, new methods, and new benchmark datasets are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and [`docs/benchmarking.md`](docs/benchmarking.md).
 
-Contributions, extensions, and new benchmark comparisons are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## 📜 License
+## License
 
 Released under the MIT License. See [LICENSE](LICENSE).

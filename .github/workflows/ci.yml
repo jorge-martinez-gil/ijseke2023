@@ -10,29 +10,33 @@ permissions:
   contents: read
 
 jobs:
-  python-checks:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install harness dependencies
+        run: pip install numpy pandas scipy scikit-learn matplotlib
 
       - name: Syntax and import checks
         run: |
           python -m py_compile methods/*.py
+          python -m py_compile bench/*.py
           python -m py_compile examples/*.py
 
       - name: Unit tests
-        run: python -m unittest discover -s tests
+        run: python -m unittest discover -s tests -v
 
-      - name: Smoke test demos (MC)
-        run: |
-          python examples/demo_lr.py
-          python examples/demo_tgp.py
+      - name: Benchmark smoke test (regenerates results/)
+        run: python -m bench --quick --datasets mc geresid --methods lr lgp
+        env:
+          MPLCONFIGDIR: /tmp/mpl
